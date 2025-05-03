@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retailer Portal - Hatake TCG</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <header role="banner">
+        <div class="logo-container">
+            <a href="#" title="Back to Top">
+                <img src="/images/fhUBtKm.png" alt="Hatake TCG Logo" class="logo" loading="lazy">
+            </a>
+            <button id="dark-mode-toggle" aria-label="Toggle Dark Mode">🌙</button>
+            <select id="language-switcher">
+                <option value="en">English</option>
+                <option value="sv">Swedish</option>
+            </select>
+            <button id="cart-toggle" aria-label="View Cart">🛒</button>
+        </div>
+        <div class="nav-links">
+            <a href="#" class="home-button">🏠</a>
+            <a href="#shop">Shop</a>
+            <a href="#events">Events</a>
+            <a href="#about">About</a>
+            <a href="#partner">Partner</a>
+            <a href="/profile">Profile</a>
+            <a href="/logout">Logout</a>
+        </div>
+    </header>
+    <main role="main">
+        <section>
+            <h2>Retailer Portal</h2>
+            <h3>Welcome, <%= user.name %></h3>
+            <p>Email: <%= user.email %></p>
+            <p>Location: <%= user.location %></p>
+            <h3>Your Orders</h3>
+            <% if (orders.length === 0) { %>
+                <p>No orders found.</p>
+            <% } else { %>
+                <ul>
+                    <% orders.forEach(order => {
