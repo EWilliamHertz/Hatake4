@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Hatake TCG</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <header role="banner">
+        <div class="logo-container">
+            <a href="#" title="Back to Top">
+                <img src="/images/fhUBtKm.png" alt="Hatake TCG Logo" class="logo" loading="lazy">
+            </a>
+            <button id="dark-mode-toggle" aria-label="Toggle Dark Mode">🌙</button>
+            <select id="language-switcher">
+                <option value="en">English</option>
+                <option value="sv">Swedish</option>
+            </select>
+            <button id="cart-toggle" aria-label="View Cart">🛒</button>
+        </div>
+        <div class="nav-links">
+            <a href="#" class="home-button">🏠</a>
+            <a href="#shop">Shop</a>
+            <a href="#events">Events</a>
+            <a href="#about">About</a>
+            <a href="#partner">Partner</a>
+            <% if (typeof userId !== 'undefined' && userId) { %>
+                <a href="/profile">Profile</a>
+                <a href="/logout">Logout</a>
+            <% } else { %>
+                <a href="/login">Login</a>
+                <a href="/register">Register</a>
+            <% } %>
+        </div>
+    </header>
+    <main role="main">
+        <section>
+            <h2>Your Profile</h2>
+            <form action="/profile/update" method="POST">
+                <input type="text" name="name" value="<%= user.name %>" required>
+                <input type="email" name="email" value="<%= user.email %>" required>
+                <input type="text" name="location" value="<%= user.location %>" required>
+                <button type="submit" class="cta-button">Update Profile</button>
+            </form>
+            <h3>Your Preorders</h3>
+            <% if (preorders.length === 0) { %>
+                <p>No preorders found.</p>
+            <% } else { %>
+                <ul>
+                    <% preorders.forEach(preorder => { %>
+                        <li>
+                            <strong>Order ID:</strong> <%= preorder.id %><br>
+                            <strong>Status:</strong> <%= preorder.status %><br>
+                            <strong>Placed on:</strong> <%= preorder.created_at %><br>
+                            <strong>Items:</strong> <%= preorder.cart %>
+                        </li>
+                    <% }) %>
+                </ul>
+            <% } %>
+            <h3>Your Wishlist</h3>
+            <div class="wishlist-grid">
+                <% wishlist.forEach(item => { %>
+                    <div class="product-card">
+                        <img src="<%= item.image %>" alt="<%= item.name %>" class="product-image" loading="lazy">
+                        <h3><%= item.name %></h3>
+                        <p><%= item.description %></p>
+                        <div class="price">$<%= item.price %></div>
+                        <button class="cart-button">Add to Cart</button>
+                        <button class="delete-button" data-id="<%= item.id %>">Delete</button>
+                    </div>
+                <% }) %>
+            </div>
+            <a href="/logout" class="cta-button">Logout</a>
+        </section>
+    </main>
+    <footer role="contentinfo">
+        <p>© 2025 Hatake TCG. All rights reserved.</p>
+    </footer>
+    <script>
+        document.querySelectorAll('.delete-button').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const id = e.target.dataset.id;
+                await fetch('/wishlist/remove', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                window.location.reload();
+            });
+        });
+    </script>
+</body>
+</html>
