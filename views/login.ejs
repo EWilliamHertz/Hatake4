@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Hatake TCG</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <header role="banner">
+        <div class="logo-container">
+            <a href="#" title="Back to Top">
+                <img src="/images/fhUBtKm.png" alt="Hatake TCG Logo" class="logo" loading="lazy">
+            </a>
+            <button id="dark-mode-toggle" aria-label="Toggle Dark Mode">🌙</button>
+            <select id="language-switcher">
+                <option value="en">English</option>
+                <option value="sv">Swedish</option>
+            </select>
+            <button id="cart-toggle" aria-label="View Cart">🛒</button>
+        </div>
+        <div class="nav-links">
+            <a href="#" class="home-button">🏠</a>
+            <a href="#shop">Shop</a>
+            <a href="#events">Events</a>
+            <a href="#about">About</a>
+            <a href="#partner">Partner</a>
+            <% if (typeof userId !== 'undefined' && userId) { %>
+                <a href="/profile">Profile</a>
+                <a href="/logout">Logout</a>
+            <% } else { %>
+                <a href="/login">Login</a>
+                <a href="/register">Register</a>
+            <% } %>
+        </div>
+    </header>
+    <main role="main">
+        <section>
+            <h2>Login</h2>
+            <% if (error) { %>
+                <p style="color: red;"><%= error %></p>
+            <% } %>
+            <form action="/login" method="POST">
+                <input type="email" name="email" placeholder="Your Email" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit" class="cta-button">Login</button>
+            </form>
+            <p>Don't have an account? <a href="/register">Register</a></p>
+        </section>
+    </main>
+    <footer role="contentinfo">
+        <p>© 2025 Hatake TCG. All rights reserved.</p>
+    </footer>
+</body>
+</html>
