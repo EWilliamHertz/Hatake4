@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hatake TCG - Premium TCG Accessories</title>
+    <meta name="description" content="Premium TCG accessories crafted in Sweden by Hatake TCG. Shop deck boxes, sleeves, and more for trading card games.">
+    <meta name="keywords" content="TCG accessories, Hatake TCG, card sleeves, deck boxes, Sweden">
+    <meta property="og:title" content="Hatake TCG - Premium TCG Accessories">
+    <meta property="og:description" content="Discover premium TCG accessories crafted with passion in Sweden.">
+    <meta property="og:image" content="/images/fhUBtKm.png">
+    <meta property="og:url" content="https://hatake.eu/">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+    <header role="banner">
+        <div class="logo-container">
+            <a href="#" title="Back to Top">
+                <img src="/images/fhUBtKm.png" alt="Hatake TCG Logo" class="logo" loading="lazy">
+            </a>
+            <button id="dark-mode-toggle" aria-label="Toggle Dark Mode">🌙</button>
+            <select id="language-switcher">
+                <option value="en">English</option>
+                <option value="sv">Swedish</option>
+            </select>
+            <button id="cart-toggle" aria-label="View Cart">🛒</button>
+        </div>
+        <div class="nav-links">
+            <a href="#" class="home-button">🏠</a>
+            <a href="#shop">Shop</a>
+            <a href="#events">Events</a>
+            <a href="#about">About</a>
+            <a href="#partner">Partner</a>
+            <% if (typeof userId !== 'undefined' && userId) { %>
+                <a href="/profile">Profile</a>
+                <a href="/logout">Logout</a>
+            <% } else { %>
+                <a href="/login">Login</a>
+                <a href="/register">Register</a>
+            <% } %>
+        </div>
+    </header>
+    <main role="main">
+        <section class="hero" id="hero">
+            <h1><%= t.welcome %></h1>
+            <p><%= t.nordicBrand %></p>
+            <a href="#shop" class="cta-button"><%= t.viewProducts %></a>
+        </section>
+        <section id="shop">
+            <div class="filter-bar">
+                <input type="text" id="search-bar" placeholder="Search products..." value="<%= search %>">
+                <select id="category-filter" aria-label="Filter by Category">
+                    <option value="all" <%= category === 'all' ? 'selected' : '' %>>All Categories</option>
+                    <option value="Bag" <%= category === 'Bag' ? 'selected' : '' %>>Bag</option>
+                    <option value="Top-Loaders" <%= category === 'Top-Loaders' ? 'selected' : '' %>>Top-Loaders</option>
+                    <option value="Sleeves" <%= category === 'Sleeves' ? 'selected' : '' %>>Sleeves</option>
+                    <option value="Deckbox" <%= category === 'Deckbox' ? 'selected' : '' %>>Deckbox</option>
+                    <option value="Binder" <%= category === 'Binder' ? 'selected' : '' %>>Binder</option>
+                </select>
+                <select id="sort-filter" aria-label="Sort Products">
+                    <option value="default" <%= sort === 'default' ? 'selected' : '' %>>Sort: Default</option>
+                    <option value="price-low" <%= sort === 'price-low' ? 'selected' : '' %>>Price: Low to High</option>
+                    <option value="price-high" <%= sort === 'price-high' ? 'selected' : '' %>>Price: High to Low</option>
+                </select>
+                <select id="currency-switcher" aria-label="Select Currency">
+                    <option value="USD" selected>USD</option>
+                    <option value="SEK">SEK</option>
+                    <option value="EUR">EUR</option>
+                </select>
+            </div>
+            <div class="product-grid" id="product-grid">
+                <% products.forEach(product => { %>
+                    <div class="product-card" data-category="<%= product.category %>" data-price="<%= product.price %>" data-name="<%= product.name %>" data-stock="<%= product.stock %>" data-release-date="<%= product.release_date %>" data-id="<%= product.id %>">
+                        <img src="<%= product.image %>" alt="<%= product.name %>" class="product-image" loading="lazy">
+                        <h3><%= product.name %></h3>
+                        <p><%= product.description.split('.')[0] %>.</p>
+                        <% if (product.averageRating) { %>
+                            <div class="rating">
+                                <span class="stars"><%= '★'.repeat(Math.round(product.averageRating)) + '☆'.repeat(5 - Math.round(product.averageRating)) %></span>
+                                <span class="review-count">(<%= product.reviewCount %> reviews)</span>
+                            </div>
+                        <% } %>
+                        <div class="price">$<%= product.price %></div>
+                        <div class="countdown-timer" id="timer-<%= product.name %>"></div>
+                        <div class="stock-indicator">
+                            <% if (product.stock <= 5 && product.stock > 0) { %>
+                                <span style="color: red;">Hurry! Only <%= product.stock %> units left!</span>
+                            <% } else if (product.stock <= 0) { %>
+                                <span class="sold-out">Preorder Sold Out</span>
+                            <% } else { %>
+                                Only <%= product.stock %> units left for preorder
+                            <% } %>
+                        </div>
+                        <% if (product.stock <= 0) { %>
+                            <button class="notify-button" data-product-id="<%= product.id %>">Notify Me</button>
+                        <% } else { %>
+                            <button class="cart-button" tabindex="0">Add to Cart</button>
+                            <button class="wishlist-button" tabindex="0">Add to Wishlist</button>
+                        <% } %>
+                    </div>
+                <% }) %>
+            </div>
+        </section>
+        <section id="events">
+            <h2>Events</h2>
+            <div class="event-grid">
+                <% events.forEach(event => { %>
+                    <div class="event-card" data-type="<%= event.type %>" data-region="<%= event.region %>">
+                        <img src="<%= event.image %>" alt="<%= event.name %>" class="event-image" loading="lazy">
+                        <h3><%= event.name %></h3>
+                        <p><strong>Date:</strong> <%= event.date %></p>
+                        <p><strong>Location:</strong> <%= event.location %></p>
+                        <p><%= event.description %></p>
+                        <a href="<%= event.link %>" target="_blank" class="cta-button">Learn More</a>
+                        <button class="rsvp-button" data-event-id="<%= event.id %>">RSVP</button>
+                    </div>
+                <% }) %>
+            </div>
+        </section>
+        <section id="about">
+            <h2>About Us</h2>
+            <p>Premium Trading Card Game Accessories crafted with passion in Sweden by Hatake TCG.</p>
+        </section>
+        <section id="partner">
+            <h2>Partner with Us</h2>
+            <form action="/partner-application" method="POST">
+                <input type="text" name="name" placeholder="Your Name" required>
+                <input type="email" name="email" placeholder="Your Email" required>
+                <input type="text" name="business_name" placeholder="Business Name" required>
+                <input type="text" name="location" placeholder="Location" required>
+                <select name="partnership_type" required>
+                    <option value="" disabled selected>Select Partnership Type</option>
+                    <option value="retailer">Retailer</option>
+                    <option value="event">Event Organizer</option>
+                </select>
+                <textarea name="message" placeholder="Your Message" required></textarea>
+                <label><input type="checkbox" name="request_samples"> Request Samples</label>
+                <button type="submit" class="cta-button">Submit Application</button>
+            </form>
+        </section>
+        <div id="lightbox" class="lightbox">
+            <span class="close">×</span>
+            <div class="lightbox-content">
+                <img src="" alt="Product Image">
+                <div class="video-placeholder">
+                    <p>Product video coming soon!</p>
+                </div>
+                <div class="description" id="lightbox-description"></div>
+                <div class="reviews">
+                    <h4>Customer Reviews</h4>
+                    <div id="reviews-list"></div>
+                    <% if (typeof userId !== 'undefined' && userId) { %>
+                        <form id="review-form">
+                            <select name="rating" required>
+                                <option value="" disabled selected>Select Rating</option>
+                                <option value="5">★★★★★</option>
+                                <option value="4">★★★★☆</option>
+                                <option value="3">★★★☆☆</option>
+                                <option value="2">★★☆☆☆</option>
+                                <option value="1">★☆☆☆☆</option>
+                            </select>
+                            <textarea name="comment" placeholder="Your Review" required></textarea>
+                            <input type="hidden" name="productId" id="review-product-id">
+                            <button type="submit" class="cta-button">Submit Review</button>
+                        </form>
+                    <% } else { %>
+                        <p><a href="/login">Log in</a> to leave a review.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+        <div id="notify-lightbox" class="lightbox">
+            <span class="close">×</span>
+            <div class="lightbox-content">
+                <h3>Notify Me When Available</h3>
+                <form id="notify-form">
+                    <input type="email" name="email" placeholder="Your Email" required>
+                    <input type="hidden" name="productId" id="notify-product-id">
+                    <button type="submit" class="cta-button">Submit</button>
+                </form>
+            </div>
+        </div>
+        <div id="cart-modal" class="lightbox">
+            <span class="close">×</span>
+            <div class="lightbox-content">
+                <h3>Your Cart</h3>
+                <div id="cart-items"></div>
+                <div id="cart-total" style="margin-top: 1rem; font-weight: bold;">Total: $0.00</div>
+                <a href="/checkout" class="cta-button">Proceed to Checkout</a>
+            </div>
+        </div>
+        <div id="loading-spinner">
+            <p>Loading...</p>
+        </div>
+    </main>
+    <footer role="contentinfo">
+        <p>© 2025 Hatake TCG. All rights reserved.</p>
+    </footer>
+    <script>
+        const productDescriptions = {
+            'Duffel Bag': '47*28*55cm tournament-ready bag with durable materials.'
+        };
+        const exchangeRates = { USD: 1, SEK: 10.5, EUR: 0.92 };
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const body = document.body;
+        const cartToggle = document.getElementById('cart-toggle');
+        const cartModal = document.getElementById('cart-modal');
+        const closeCartModal = cartModal.querySelector('.close');
+        const searchBar = document.getElementById('search-bar');
+        const categoryFilter = document.getElementById('category-filter');
+        const sortFilter = document.getElementById('sort-filter');
+        const currencySwitcher = document.getElementById('currency-switcher');
+        const languageSwitcher = document.getElementById('language-switcher');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = lightbox.querySelector('img');
+        const lightboxDescription = document.getElementById('lightbox-description');
+        const reviewsList = document.getElementById('reviews-list');
+        const reviewForm = document.getElementById('review-form');
+        const reviewProductId = document.getElementById('review-product-id');
+        const closeLightbox = lightbox.querySelector('.close');
+        const notifyLightbox = document.getElementById('notify-lightbox');
+        const notifyForm = document.getElementById('notify-form');
+        const notifyProductId = document.getElementById('notify-product-id');
+        const closeNotifyLightbox = notifyLightbox.querySelector('.close');
+        const notifyButtons = document.querySelectorAll('.notify-button');
+
+        darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            darkModeToggle.textContent = body.classList.contains('dark-mode') ? '☀️' : '🌙';
+        });
+
+        cartToggle.addEventListener('click', () => {
+            cartModal.style.display = 'flex';
+            updateCartDisplay();
+        });
+
+        closeCartModal.addEventListener('click', () => {
+            cartModal.style.display = 'none';
+        });
+
+        cartModal.addEventListener('click', (e) => {
+            if (e.target === cartModal) cartModal.style.display = 'none';
+        });
+
+        document.querySelectorAll('.cart-button').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const card = button.closest('.product-card');
+                const name = card.dataset.name;
+                const price = parseFloat(card.dataset.price);
+                const response = await fetch('/add-to-cart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, price })
+                });
+                const data = await response.json();
+                if (data.success) updateCartDisplay(data.cart);
+            });
+        });
+
+        function updateCartDisplay(cart = []) {
+            const cartItemsDiv = document.getElementById('cart-items');
+            const cartTotalDiv = document.getElementById('cart-total');
+            cartItemsDiv.innerHTML = '';
+            let total = 0;
+            cart.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'cart-item';
+                const priceInCurrency = (item.price * exchangeRates[currencySwitcher.value]).toFixed(2);
+                itemDiv.innerHTML = `
+                    <span>${item.name} - ${currencySwitcher.value} ${priceInCurrency}</span>
+                    <select onchange="updateCartItem(${index}, this.value)">
+                        ${[...Array(10).keys()].map(i => `<option value="${i + 1}" ${item.quantity == i + 1 ? 'selected' : ''}>${i + 1}</option>`).join('')}
+                    </select>
+                    <button class="remove-button" data-index="${index}">Remove</button>
+                `;
+                cartItemsDiv.appendChild(itemDiv);
+                total += priceInCurrency * item.quantity;
+                itemDiv.querySelector('.remove-button').addEventListener('click', async (e) => {
+                    const index = parseInt(e.target.dataset.index);
+                    await fetch('/remove-from-cart', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ index })
+                    });
+                    updateCartDisplay();
+                });
+            });
+            cartTotalDiv.textContent = `Total: ${currencySwitcher.value} ${total.toFixed(2)}`;
+        }
+
+        async function updateCartItem(index, quantity) {
+            await fetch('/update-cart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ index, quantity })
+            });
+            updateCartDisplay();
+        }
+
+        currencySwitcher.addEventListener('change', () => updateCartDisplay());
+
+        function updateFilters() {
+            document.getElementById('loading-spinner').style.display = 'block';
+            const params = new URLSearchParams();
+            params.set('search', searchBar.value);
+            params.set('category', categoryFilter.value);
+            params.set('sort', sortFilter.value);
+            params.set('lang', languageSwitcher.value);
+            window.location.href = `/?${params.toString()}`;
+        }
+
+        searchBar.addEventListener('input', updateFilters);
+        categoryFilter.addEventListener('change', updateFilters);
+        sortFilter.addEventListener('change', updateFilters);
+        languageSwitcher.addEventListener('change', updateFilters);
+
+        document.querySelectorAll('.product-card').forEach(card => {
+            card.addEventListener('click', async () => {
+                const imgSrc = card.querySelector('.product-image').src;
+                const name = card.dataset.name;
+                const productId = card.dataset.id;
+                lightboxImg.src = imgSrc;
+                lightboxDescription.textContent = productDescriptions[name] || 'No description available.';
+                reviewProductId.value = productId;
+                const response = await fetch(`/reviews/${productId}`);
+                const reviews = await response.json();
+                reviewsList.innerHTML = '';
+                reviews.forEach(review => {
+                    const reviewDiv = document.createElement('div');
+                    reviewDiv.className = 'review';
+                    reviewDiv.innerHTML = `
+                        <div class="stars">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
+                        <p>${review.comment}</p>
+                        <p><small>By ${review.name} on ${review.created_at}</small></p>
+                    `;
+                    reviewsList.appendChild(reviewDiv);
+                });
+                lightbox.style.display = 'flex';
+            });
+        });
+
+        if (reviewForm) {
+            reviewForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const rating = reviewForm.querySelector('select[name="rating"]').value;
+                const comment = reviewForm.querySelector('textarea[name="comment"]').value;
+                const productId = reviewForm.querySelector('input[name="productId"]').value;
+                await fetch('/reviews', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ productId, rating, comment })
+                });
+                const response = await fetch(`/reviews/${productId}`);
+                const reviews = await response.json();
+                reviewsList.innerHTML = '';
+                reviews.forEach(review => {
+                    const reviewDiv = document.createElement('div');
+                    reviewDiv.className = 'review';
+                    reviewDiv.innerHTML = `
+                        <div class="stars">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
+                        <p>${review.comment}</p>
+                        <p><small>By ${review.name} on ${review.created_at}</small></p>
+                    `;
+                    reviewsList.appendChild(reviewDiv);
+                });
+                reviewForm.reset();
+            });
+        }
+
+        closeLightbox.addEventListener('click', () => {
+            lightbox.style.display = 'none';
+        });
+
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) lightbox.style.display = 'none';
+        });
+
+        notifyButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                notifyProductId.value = button.dataset.productId;
+                notifyLightbox.style.display = 'flex';
+            });
+        });
+
+        closeNotifyLightbox.addEventListener('click', () => {
+            notifyLightbox.style.display = 'none';
+        });
+
+        notifyLightbox.addEventListener('click', (e) => {
+            if (e.target === notifyLightbox) notifyLightbox.style.display = 'none';
+        });
+
+        notifyForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = notifyForm.querySelector('input[name="email"]').value;
+            const productId = notifyForm.querySelector('input[name="productId"]').value;
+            const response = await fetch('/notify-me', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId, email })
+            });
+            const data = await response.json();
+            if (data.success) {
+                alert(data.message);
+                notifyLightbox.style.display = 'none';
+            }
+        });
+
+        document.querySelectorAll('.wishlist-button').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const card = button.closest('.product-card');
+                const productId = card.dataset.id;
+                await fetch('/wishlist/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ productId })
+                });
+                alert('Added to wishlist!');
+            });
+        });
+
+        document.querySelectorAll('.rsvp-button').forEach(button => {
+            button.addEventListener('click', async () => {
+                const eventId = button.dataset.eventId;
+                const response = await fetch('/rsvp?eventId=' + eventId);
+                const data = await response.json();
+                if (data.success) alert(data.message);
+            });
+        });
+
+        document.getElementById('loading-spinner').style.display = 'none';
+    </script>
+</body>
+</html>
