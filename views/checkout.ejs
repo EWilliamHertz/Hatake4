@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Hatake TCG</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+    <header role="banner">
+        <div class="logo-container">
+            <a href="#" title="Back to Top">
+                <img src="/images/fhUBtKm.png" alt="Hatake TCG Logo" class="logo" loading="lazy">
+            </a>
+            <button id="dark-mode-toggle" aria-label="Toggle Dark Mode">🌙</button>
+            <select id="language-switcher">
+                <option value="en">English</option>
+                <option value="sv">Swedish</option>
+            </select>
+            <button id="cart-toggle" aria-label="View Cart">🛒</button>
+        </div>
+        <div class="nav-links">
+            <a href="#" class="home-button">🏠</a>
+            <a href="#shop">Shop</a>
+            <a href="#events">Events</a>
+            <a href="#about">About</a>
+            <a href="#partner">Partner</a>
+            <% if (typeof userId !== 'undefined' && userId) { %>
+                <a href="/profile">Profile</a>
+                <a href="/logout">Logout</a>
+            <% } else { %>
+                <a href="/login">Login</a>
+                <a href="/register">Register</a>
+            <% } %>
+        </div>
+    </header>
+    <main role="main">
+        <section>
+            <h2>Checkout</h2>
+            <div class="cart-summary">
+                <h3>Your Cart</h3>
+                <ul>
+                    <% cart.forEach(item => { %>
+                        <li>
+                            <%= item.name %> - $<%= item.price %> x <%= item.quantity %>
+                        </li>
+                    <% }) %>
+                </ul>
+                <p><strong>Total:</strong> $<%= cart.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2) %></p>
+            </div>
+            <form id="checkout-form">
+                <h3>Shipping Information</h3>
+                <input type="text" name="address" placeholder="Address" required>
+                <input type="text" name="city" placeholder="City" required>
+                <input type="text" name="postalCode" placeholder="Postal Code" required>
+                <input type="text" name="country" placeholder="Country" required>
+                <div id="card-element"></div>
+                <div id="card-errors" role="alert"></div>
+                <button type="submit" class="cta-button">Pay Now</button>
+            </form>
+        </section>
+    </main>
+    <footer role="contentinfo">
+        <p>© 2025 Hatake TCG. All rights reserved.</p>
+    </footer>
+    <script>
+        const stripe = Stripe('<%= process.env.STRIPE_PUBLISHABLE_KEY %>');
+        const elements = stripe.elements();
+        const card = elements.create('card');
+        card.mount('#card-element');
+
+        card.on('change', (event) => {
+            const displayError = document.getElementById('card-errors');
+            if (event.error) {
+                displayError.textContent = event.error.message;
+            } else {
+                displayError.textContent = '';
+            }
+        });
+
+        const form = document.getElementById('checkout-form');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const { paymentIntent, error } = await stripe.createPaymentIntent({
+                amount: <%= cart.reduce((total, item) => total + (item.price * item.quantity), 0) * 100 %>,
+                currency: 'usd',
+            });
+
+            if (error) {
+                document.getElementById('card-errors').textContent = error.message;
+            } else {
+                fetch('/process-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ paymentIntentId: paymentIntent.id, cart: <%- JSON.stringify(cart) %> })
+                }).then(res => res.json()).then(data => {
+                    if (data.success) window.location.href = '/payment-confirmation';
+                });
+            }
+        });
+    </script>
+</body>
+</html>
